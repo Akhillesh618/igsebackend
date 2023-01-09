@@ -3,13 +3,14 @@ const app = express();
 const mongoose = require('mongoose');
 const user = require("./users.js");
 const userbills = require("./userbills.js");
+const prices = require("./prices.js");
+
 var cors = require('cors');
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const JWT_SECRET = 'my-secret-key';
 const uri = "mongodb+srv://akhil:8686Amma@igse.9ha2pr2.mongodb.net/igse?retryWrites=true&w=majority";
 const MongoClient = require('mongodb').MongoClient;
-
 
 bodyParser = require('body-parser'),
 mongoose.connect(uri, {
@@ -33,7 +34,7 @@ app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: false
 }));
-
+/////////////////////////REGISTER API////////////////////////////////
 
 app.post("/register", (req, res) => {
     try {
@@ -106,7 +107,7 @@ app.post("/register", (req, res) => {
                 email: req.body.email,
                 password: req.body.password,
               };
-              const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+              const token = jwt.sign(payload, JWT_SECRET);
               res.send({ success: 'Login successful', token , name: data.toString() });
   
           } else {
@@ -131,7 +132,7 @@ app.post("/register", (req, res) => {
   
   });
 
-//////////POST USER BILLS API////////////////////////
+//////////SUBMIT USER BILLS API////////////////////////
 app.post("/submitbill", (req, res) => {
   try {
     if (req.body && req.body.credit && req.body.submission_date && req.body.electricity_reading_Day && req.body.electricity_reading_Night && req.body.gas_reading) {
@@ -184,6 +185,8 @@ app.post("/submitbill", (req, res) => {
                   });
                 }
               });
+
+////////////////////////// GET USERBILLS API//////////////////////////////
   
 app.get('/userbills', (req, res) => {
   const collection = client.db("igse").collection("userbills");
@@ -191,9 +194,26 @@ app.get('/userbills', (req, res) => {
     res.send(documents);
   });
     
-    
   });
 
+////////////////SAVE AND UPDATES BILL RATES API////////////////////////////////////////////////
+
+app.post('/updaterates', async (req, res) => {
+  try {
+    const updatedPrices = await prices.findOneAndUpdate(
+      {}, // query
+      {
+        electricityDay: req.body.electricityDay,
+        electricityNight: req.body.electricityNight,
+        gas: req.body.gas
+      }, // updated data
+      { upsert: true, new: true } // options
+    );
+    res.sendStatus(200);
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
 
 app.listen(5000, () => {
     console.log('Server listening on port 5000');
