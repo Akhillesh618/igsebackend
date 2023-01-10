@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 
 userbillsSchema = new Schema( {
       credit: String,
-    //   email: String,
+      email: String,
       submission_date: String,
       electricity_reading_Day: String,
       electricity_reading_Night: String,

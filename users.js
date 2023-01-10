@@ -8,7 +8,8 @@ userSchema = new Schema( {
       address: String,
       propertyType: String,
       bedrooms: String,
-      voucherCode: String
+      voucherCode: String,
+      credits: Number,
 
 }),
 user = mongoose.model('user', userSchema);
