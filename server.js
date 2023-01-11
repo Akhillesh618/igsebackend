@@ -70,7 +70,8 @@ app.post("/register", async (req, res) => {
                           propertyType: req.body.propertyType,
                           bedrooms: req.body.bedrooms,
                           voucherCode: req.body.voucherCode,
-                          credits: UserCredits
+                          credits: UserCredits,
+                          bills : []
                       });
                       // Save the new user object to the database
                       User.save((err, data) => {
@@ -190,7 +191,13 @@ app.post('/submitbill', async (req, res) => {
       electricity_reading_Night: req.body.electricity_reading_Night,
       gas_reading: req.body.gas_reading
     });
-    
+
+      // Find the user with the given email
+  const existinguserinUser = await user.findOne({ email: req.body.email });
+  if (existinguserinUser) {
+    // Push the new bill object to the user's bills array
+    await user.updateOne({ email: req.body.email }, { $push: { bills: newBill._id    } });
+  }
 
     // Save the bill to the database
     await newBill.save();

@@ -10,6 +10,7 @@ userSchema = new Schema( {
       bedrooms: String,
       voucherCode: String,
       credits: Number,
+      bills: Array,
 
 }),
 user = mongoose.model('user', userSchema);
