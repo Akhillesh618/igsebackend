@@ -35,105 +35,127 @@ app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: false
 }));
-/////////////////////////REGISTER API////////////////////////////////
 
-app.post("/register", (req, res) => {
-    try {
+
+////////////////////////NEW USER REGISTER API//////////////////////////////////
+
+app.post("/register", async (req, res) => {
+  try {
+      // Check if all required parameters are present in the request body
       if (req.body && req.body.name && req.body.email && req.body.password && req.body.address && req.body.propertyType && req.body.bedrooms && req.body.voucherCode) {
-  
 
-        const UserCredits = 200;
-        // const existigUserwithsamevoucher = await userbills.findOne({ email: req.body.email });
+          const UserCredits = 200;
 
-        user.find({ email: req.body.email }, (err, data) => {
-  
-          if (data.length == 0) {
-  
-                        let User = new user({
-                        name: req.body.name,
-                        email: req.body.email,
-                        password: req.body.password,
-                        address: req.body.address,
-                        propertyType: req.body.propertyType,
-                        bedrooms: req.body.bedrooms,
-                        voucherCode: req.body.voucherCode,
-                        credits: UserCredits
-                        });
-                        User.save((err, data) => {
-                            if (err) {
-                              res.status(400).json({
-                                errorMessage: err,
-                                status: false
-                              });
-                            } else {
-                              res.status(200).json({
-                                status: true,
-                                title: 'Registered Successfully.'
-                              });
-                            }
-                          });
-                
-                        } else {
-                      
-                          res.status(200).json({
-                            status: true,
-                            title: 'email  Already Exist!.'
-                          });
-                        }
-                
+          // Check if an existing user with the same email exists
+          const existingUser = await user.find({ email: req.body.email });
+
+          // Check if any outher user already used the voucher code 
+          const existingUserVoucher = await user.find({ voucherCode: req.body.voucherCode });
+        
+          if (existingUser.length == 0 && existingUserVoucher.length == 0) {
+              
+            // Checking given VoucerCode with available vouchers in data base
+              const collection = client.db("igse").collection("vouchers");
+
+              collection.find({voucherCode:req.body.voucherCode}).toArray((err, documents) => {
+                  if (err) throw err;
+                  if (documents.length > 0) {
+                      // existingUserVoucher is present in the vouchers collection
+                      // Create a new user object
+                      let User = new user({
+                          name: req.body.name,
+                          email: req.body.email,
+                          password: req.body.password,
+                          address: req.body.address,
+                          propertyType: req.body.propertyType,
+                          bedrooms: req.body.bedrooms,
+                          voucherCode: req.body.voucherCode,
+                          credits: UserCredits
                       });
-                
-                    } else {
-                      res.status(400).json({
-                        errorMessage: 'Add proper parameter first!',
-                        status: false
+                      // Save the new user object to the database
+                      User.save((err, data) => {
+                          if (err) {
+                              throw err;
+                          }
                       });
-                    }
-                  } catch (e) {
-                    res.status(400).json({
-                      errorMessage: 'Something went wrong!',
-                      status: false
-                    });
-        }
+                      res.status(200).json({
+                          status: true,
+                          title: 'Registered Successfully.'
+                      });
+                  } else {
+                      // existingUserVoucher is not present in the vouchers collection
+                      res.status(200).json({
+                          status: true,
+                          title: 'Invalid voucher code'
+                      });
+                  }
+              });
+          } else {
+              res.status(200).json({
+                  status: true,
+                  title: 'Email or Voucher Already Exist! in our Database.'
+              });
+          }
+      } else {
+          // Send an error message if required parameters are not present
+          res.status(400).json({
+              errorMessage: 'Add proper parameter first!',
+              status: false
+          });
+      }
+  } catch (e) {
+      // Send an error message if something goes wrong
+      res.status(400).json({
+          errorMessage: 'Something went wrong!',
+          status: false
+      });
+  }
 });
 
+
+
+//////////////////////////////////////////////////////////////////
+
 ///LOGIN API///////
-  app.post("/login", (req, res) => {
-    try {
-
+app.post("/login", async (req, res) => {
+  try {
+      // check if request body contains required parameters
       if (req.body && req.body.email && req.body.password) {
-        user.find({ email: req.body.email, password: req.body.password}, (err, data) => {
-            
+          // search for user with the given email and password
+          const data = await user.find({ email: req.body.email, password: req.body.password});
+          // check if user was found
           if (data.length > 0) {
-
+              // create payload for JWT
               const payload = {
-                email: req.body.email,
-                password: req.body.password,
+                  email: req.body.email,
+                  password: req.body.password,
               };
+              // sign and create JWT
               const token = jwt.sign(payload, JWT_SECRET);
+              // send successful response with token and user data
               res.send({ success: 'Login successful', token , data });
-  
           } else {
-            res.status(200).json({
-              errorMessage: 'incorrect! email or password',
-              status: false
-            });
+              // send error message for incorrect login
+              res.status(200).json({
+                  errorMessage: 'incorrect email or password',
+                  status: false
+              });
           }
-        })
       } else {
-        res.status(400).json({
-          errorMessage: 'Add proper parameter first! 3',
-          status: false
-        });
+          // send error message for missing parameters
+          res.status(400).json({
+              errorMessage: 'Please provide email and password in request body',
+              status: false
+          });
       }
-    } catch (e) {
+  } catch (error) {
       res.status(400).json({
-        errorMessage: 'Something went wrong!',
-        status: false
+          errorMessage: 'Something went wrong!',
+          status: false
       });
-    }
-  
-  });
+  }
+});
+
 
 //////////SUBMIT USER BILLS API////////////////////////
 app.post('/submitbill', async (req, res) => {
