@@ -162,7 +162,7 @@ app.post("/login", async (req, res) => {
 app.post('/submitbill', async (req, res) => {
   try {
     // Validate the input data
-    if (!req.body.email || !req.body.credit || !req.body.submission_date || !req.body.electricity_reading_Day || !req.body.electricity_reading_Night || !req.body.gas_reading) {
+    if (!req.body.email ||  !req.body.submission_date || !req.body.electricity_reading_Day || !req.body.electricity_reading_Night || !req.body.gas_reading) {
       return res.status(400).json({
         errorMessage: 'Missing required fields',
         status: false
@@ -181,11 +181,11 @@ app.post('/submitbill', async (req, res) => {
       }
 
     }
-
+    const billunpaid= "Unpaid"
     // Create a new bill object
     const newBill = new userbills({
       email: req.body.email,
-      credit: req.body.credit,
+      billStatus: billunpaid,
       submission_date: req.body.submission_date,
       electricity_reading_Day: req.body.electricity_reading_Day,
       electricity_reading_Night: req.body.electricity_reading_Night,

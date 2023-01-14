@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 userbillsSchema = new Schema( {
-      credit: String,
+      billStatus: String,
       email: String,
       submission_date: String,
       electricity_reading_Day: String,
