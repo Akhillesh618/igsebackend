@@ -5,13 +5,13 @@ const user = require("./users.js");
 const userbills = require("./userbills.js");
 const prices = require("./prices.js");
 const vouchers = require("./vouchers.js");
-
+require("dotenv").config();
+const PORT=process.env.PORT || 5000;
 var cors = require("cors");
 var jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const JWT_SECRET = "my-secret-key";
-const uri =
-  "mongodb+srv://akhil:8686Amma@igse.9ha2pr2.mongodb.net/igse?retryWrites=true&w=majority";
+const uri = process.env.MONGODB_URL;
 const MongoClient = require("mongodb").MongoClient;
 
 (bodyParser = require("body-parser")),
@@ -325,6 +325,6 @@ app.get("/propertycount", async function (req, res) {
     res.send(allproperty);
   });
 });
-app.listen(5000, () => {
-  console.log("Server listening on port 5000");
+app.listen(PORT, () => {
+console.log(`Server listening on port ${PORT} `);
 });
