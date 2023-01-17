@@ -325,6 +325,11 @@ app.get("/propertycount", async function (req, res) {
     res.send(allproperty);
   });
 });
+
+app.get("/", (req, res) => {
+  res.send("Welcome to my Express.js app!");
+});
+
 app.listen(PORT, () => {
 console.log(`Server listening on port ${PORT} `);
 });
