@@ -11,7 +11,7 @@ var cors = require("cors");
 var jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const JWT_SECRET = "my-secret-key";
-const uri = process.env.MONGODB_URL;
+const uri = "mongodb+srv://akhil:8686Amma@igse.9ha2pr2.mongodb.net/igse?retryWrites=true&w=majority"
 const MongoClient = require("mongodb").MongoClient;
 
 (bodyParser = require("body-parser")),
