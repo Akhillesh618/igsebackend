@@ -9,7 +9,7 @@ userSchema = new Schema( {
       propertyType: String,
       bedrooms: String,
       voucherCode: String,
-      credits: Number,
+      credits: String,
       bills: Array,
 
 }),

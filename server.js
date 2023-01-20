@@ -301,6 +301,22 @@ app.post("/addvoucher", async (req, res) => {
 });
 
 //////// PUT REQUEST TO UPDATE THE STATUS IN Userbill schema////////////////////////////////
+app.put("/paybill",async function (req, res) {
+  try {
+    const collection = client.db("igse").collection("userbills");
+    const keepbill = client.db("igse").collection("users");
+    let updateBillStatus = await collection.updateOne({ email: req.body.email }, { $set: { billStatus: "paid" } });
+    let updateUserBills = await keepbill.updateOne({ email: req.body.email }, { $set: { credits: req.body.credit } });
+
+    if(updateBillStatus.modifiedCount > 0 && updateUserBills.modifiedCount > 0){
+        res.status(200).json({message: "Successfully updated bill status and user bills"})
+    }else{
+        res.status(500).json({message: "Could not update bill status or user bills"})
+    }
+  } catch (error) {
+    res.status(500).json({message: "Error updating bill status or user bills", error: error})
+  }
+})
 
 ////////////////////////////////////////////////////////////////////////////////////
 
