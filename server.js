@@ -11,7 +11,7 @@ var cors = require("cors");
 var jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const JWT_SECRET = "my-secret-key";
-const uri = "mongodb+srv://akhil:8686Amma@igse.9ha2pr2.mongodb.net/igse?retryWrites=true&w=majority"
+const uri = process.env.MONGODB_URL
 const MongoClient = require("mongodb").MongoClient;
 
 (bodyParser = require("body-parser")),
@@ -29,6 +29,7 @@ const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", function () {
   console.log("Successfully connected to MongoDB!");
+
 });
 app.use(cors());
 app.use(bodyParser.json()); // to support JSON-encoded bodies
@@ -146,7 +147,7 @@ app.post("/login", async (req, res) => {
           password: req.body.password,
         };
         // sign and create JWT
-        const token = jwt.sign(payload, JWT_SECRET);
+        const token = jwt.sign(payload, JWT_SECRET,{ expiresIn: 3600 });
         // send successful response with token and user data
         res.send({ success: "Login successful", token, data });
       } else {
